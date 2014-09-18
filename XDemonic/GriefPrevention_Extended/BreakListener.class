@@ -1,0 +1,325 @@
+package XDemonic.GriefPrevention_Extended;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import me.ryanhamshire.GriefPrevention.PlayerData;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+
+public class BreakListener implements Listener
+{
+	  public Main plugin;
+	  
+	  public BreakListener(Main c)
+	  {
+	    Bukkit.getPluginManager().registerEvents(this, c);
+	    this.plugin = c;
+	  }
+	  
+	  @SuppressWarnings("deprecation")
+	@EventHandler(priority=EventPriority.HIGHEST)
+	  public void onPlayerInteract(PlayerInteractEvent e)
+	  {
+	    try
+	    {
+	      if (e.hasBlock())
+	      {
+	        Block block = e.getClickedBlock();
+	        Player player = e.getPlayer();
+	        PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(player.getName());
+	        String BID = "" + block.getTypeId();
+	        String BFULLID = BID + ":" + block.getData();
+	        if (IsInDebugMode(player.getName())) {
+	          DisplayDebugMessage(player, block);
+	        }
+	        if (playerData.ignoreClaims) {
+	          return;
+	        }
+	        Location loc = block.getLocation();
+	        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, false, null);
+	        if (claim != null)
+	        {
+	          List<String> CanceledItems = this.plugin.getConfig().getStringList("ManagerAndBuilderList.ItemList");
+	          if (player.getItemInHand() != null)
+	          {
+	            ItemStack item = player.getItemInHand();
+	            String ID = "" + item.getData().getItemTypeId();
+	            String FullID = ID + ":" + item.getData().getData();
+	            if (((CanceledItems.contains(FullID) | CanceledItems.contains(ID))) && (!HasBuilderPermission(claim, player.getName())))
+	            {
+	              player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);return;
+	            }
+	          }
+///////CHECK RIGHT CLICK
+	          if ((e.getAction() == Action.RIGHT_CLICK_BLOCK) && (!player.isSneaking()))
+	          {
+	            List<String> ARightClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.RightClick");
+	            if ((ARightClickBlocks.contains(BFULLID) | ARightClickBlocks.contains(BID)))
+	            {
+	              if (!HasBuilderPermission(claim, player.getName()))
+	              {
+	                player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	              }
+	            }
+	            else
+	            {
+	              List<String> BRightClickBlocks = this.plugin.getConfig().getStringList("ContainerList.RightClick");
+	              if ((BRightClickBlocks.contains(BFULLID) | BRightClickBlocks.contains(BID)))
+	              {
+	                if (!HasContainerPermission(claim, player.getName()))
+	                {
+	                  player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                }
+	              }
+	              else
+	              {
+	                List<String> CRightClickBlocks = this.plugin.getConfig().getStringList("AccessorList.RightClick");
+	                if ((CRightClickBlocks.contains(BFULLID) | CRightClickBlocks.contains(BID)))
+	                {
+	                  if (!HasAccessorPermission(claim, player.getName()))
+	                  {
+	                    player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                  }
+	                }
+	                else {
+	                  return;
+	                }
+	              }
+	            }
+	          }
+///////CHECK RIGHT CLICK AND SNEAK
+	          if ((e.getAction() == Action.RIGHT_CLICK_BLOCK) && (player.isSneaking()))
+	          {
+	            List<String> ARightClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.ShiftRightClick");
+	            if ((ARightClickBlocks.contains(BFULLID) | ARightClickBlocks.contains(BID)))
+	            {
+	              if (!HasBuilderPermission(claim, player.getName()))
+	              {
+	                player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	              }
+	            }
+	            else
+	            {
+	              List<String> BRightClickBlocks = this.plugin.getConfig().getStringList("ContainerList.ShiftRightClick");
+	              if ((BRightClickBlocks.contains(BFULLID) | BRightClickBlocks.contains(BID)))
+	              {
+	                if (!HasContainerPermission(claim, player.getName()))
+	                {
+	                  player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                }
+	              }
+	              else
+	              {
+	                List<String> CRightClickBlocks = this.plugin.getConfig().getStringList("AccessorList.ShiftRightClick");
+	                if ((CRightClickBlocks.contains(BFULLID) | CRightClickBlocks.contains(BID)))
+	                {
+	                  if (!HasAccessorPermission(claim, player.getName()))
+	                  {
+	                    player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                  }
+	                }
+	                else {
+	                  return;
+	                }
+	              }
+	            }
+	          }
+///////CHECK LEFT CLICK
+	          if ((e.getAction() == Action.LEFT_CLICK_BLOCK) && (!player.isSneaking()))
+	          {
+	            List<String> ARightClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.LeftClick");
+	            if ((ARightClickBlocks.contains(BFULLID) | ARightClickBlocks.contains(BID)))
+	            {
+	              if (!HasBuilderPermission(claim, player.getName()))
+	              {
+	                player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	              }
+	            }
+	            else
+	            {
+	              List<String> BRightClickBlocks = this.plugin.getConfig().getStringList("ContainerList.LeftClick");
+	              if ((BRightClickBlocks.contains(BFULLID) | BRightClickBlocks.contains(BID)))
+	              {
+	                if (!HasContainerPermission(claim, player.getName()))
+	                {
+	                  player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                }
+	              }
+	              else
+	              {
+	                List<String> CRightClickBlocks = this.plugin.getConfig().getStringList("AccessorList.LeftClick");
+	                if ((CRightClickBlocks.contains(BFULLID) | CRightClickBlocks.contains(BID)))
+	                {
+	                  if (!HasAccessorPermission(claim, player.getName()))
+	                  {
+	                    player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                  }
+	                }
+	                else {
+	                  return;
+	                }
+	              }
+	            }
+	          }
+///////CHECK LEFT CLICK AND SNEAK
+	          if ((e.getAction() == Action.LEFT_CLICK_BLOCK) && (player.isSneaking()))
+	          {
+	            List<String> ARightClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.ShiftLeftClick");
+	            if ((ARightClickBlocks.contains(BFULLID) | ARightClickBlocks.contains(BID)))
+	            {
+	              if (!HasBuilderPermission(claim, player.getName()))
+	              {
+	                player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	              }
+	            }
+	            else
+	            {
+	              List<String> BRightClickBlocks = this.plugin.getConfig().getStringList("ContainerList.ShiftLeftClick");
+	              if ((BRightClickBlocks.contains(BFULLID) | BRightClickBlocks.contains(BID)))
+	              {
+	                if (!HasContainerPermission(claim, player.getName()))
+	                {
+	                  player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                }
+	              }
+	              else
+	              {
+	                List<String> CRightClickBlocks = this.plugin.getConfig().getStringList("AccessorList.ShiftLeftClick");
+	                if ((CRightClickBlocks.contains(BFULLID) | CRightClickBlocks.contains(BID)))
+	                {
+	                  if (!HasAccessorPermission(claim, player.getName()))
+	                  {
+	                    player.sendMessage(ChatColor.RED + "You don't have " + claim.getOwnerName() + "'s permission to do that!");e.setCancelled(true);
+	                  }
+	                }
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }
+	    catch (Exception EX)
+	    {
+	      Main.ERROR(EX.getMessage());
+	    }
+	  }
+	  
+	  public boolean IsInDebugMode(String PlayerName)
+	  {
+	    if (Main.DebugPlayers.contains(PlayerName)) {
+	      return true;
+	    }
+	    return false;
+	  }
+	  
+	  @SuppressWarnings("deprecation")
+	public void DisplayDebugMessage(Player player, Block block)
+	  {
+	    String BID = "" + block.getTypeId();
+	    String BFULLID = BID + ":" + block.getData();
+	    player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.YELLOW + "Block Full ID: " + ChatColor.AQUA + BFULLID);
+	    List<String> BuilderRightClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.RightClick");
+	    List<String> ContainerRightClickBlocks = this.plugin.getConfig().getStringList("ContainerList.RightClick");
+	    List<String> AccessRightClickBlocks = this.plugin.getConfig().getStringList("AccessorList.RightClick");
+	    if ((BuilderRightClickBlocks.contains(BID) | BuilderRightClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ManagerAndBuilderList.RightClick");
+	    }
+	    if ((ContainerRightClickBlocks.contains(BID) | ContainerRightClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ContainerList.RightClick");
+	    }
+	    if ((AccessRightClickBlocks.contains(BID) | AccessRightClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "AccessorList.RightClick");
+	    }
+	    List<String> BuilderShiftRightClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.ShiftRightClick");
+	    List<String> ContainerShiftRightClickBlocks = this.plugin.getConfig().getStringList("ContainerList.ShiftRightClick");
+	    List<String> AccessShiftRightClickBlocks = this.plugin.getConfig().getStringList("AccessorList.ShiftRightClick");
+	    if ((BuilderShiftRightClickBlocks.contains(BID) | BuilderShiftRightClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ManagerAndBuilderList.ShiftRightClick");
+	    }
+	    if ((ContainerShiftRightClickBlocks.contains(BID) | ContainerShiftRightClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ContainerList.ShiftRightClick");
+	    }
+	    if ((AccessShiftRightClickBlocks.contains(BID) | AccessShiftRightClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "AccessorList.ShiftRightClick");
+	    }
+	    List<String> BuilderLeftClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.LeftClick");
+	    List<String> ContainerLeftClickBlocks = this.plugin.getConfig().getStringList("ContainerList.LeftClick");
+	    List<String> AccessLeftClickBlocks = this.plugin.getConfig().getStringList("AccessorList.LeftClick");
+	    if ((BuilderLeftClickBlocks.contains(BID) | BuilderLeftClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ManagerAndBuilderList.LeftClick");
+	    }
+	    if ((ContainerLeftClickBlocks.contains(BID) | ContainerLeftClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ContainerList.LeftClick");
+	    }
+	    if ((AccessLeftClickBlocks.contains(BID) | AccessLeftClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "AccessorList.LeftClick");
+	    }
+	    List<String> BuilderShiftLeftClickBlocks = this.plugin.getConfig().getStringList("ManagerAndBuilderList.ShiftLeftClick");
+	    List<String> ContainerShiftLeftClickBlocks = this.plugin.getConfig().getStringList("ContainerList.ShiftLeftClick");
+	    List<String> AccessShiftLeftClickBlocks = this.plugin.getConfig().getStringList("AccessorList.ShiftLeftClick");
+	    if ((BuilderShiftLeftClickBlocks.contains(BID) | BuilderShiftLeftClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ManagerAndBuilderList.ShiftLeftClick");
+	    }
+	    if ((ContainerShiftLeftClickBlocks.contains(BID) | ContainerShiftLeftClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "ContainerList.ShiftLeftClick");
+	    }
+	    if ((AccessShiftLeftClickBlocks.contains(BID) | AccessShiftLeftClickBlocks.contains(BFULLID))) {
+	      player.sendMessage(ChatColor.GREEN + "[GPE] " + ChatColor.GOLD + "'" + BFULLID + "'" + ChatColor.YELLOW + " Found In: " + ChatColor.GREEN + "AccessorList.ShiftLeftClick");
+	    }
+	  }
+	  
+	  public boolean HasBuilderPermission(Claim C, String PlayerName)
+	  {
+	    String Owner = C.getOwnerName();
+	    List<String> Managers = new ArrayList<String>();
+	    List<String> Builders = new ArrayList<String>();
+	    List<String> Containers = new ArrayList<String>();
+	    List<String> Accessors = new ArrayList<String>();
+	    C.getPermissions(Builders, Containers, Accessors, Managers);
+	    if ((!Managers.contains(PlayerName.toLowerCase())) & (!Builders.contains(PlayerName.toLowerCase())) & (!Owner.equals(PlayerName))){
+	    	return false;
+	    }
+	    return true;
+	  }
+	  
+	public boolean HasContainerPermission(Claim C, String PlayerName)
+	  {
+	    String Owner = C.getOwnerName();
+	    List<String> Managers = new ArrayList<String>();
+	    List<String> Builders = new ArrayList<String>();
+	    List<String> Containers = new ArrayList<String>();
+	    List<String> Accessors = new ArrayList<String>();
+	    C.getPermissions(Builders, Containers, Accessors, Managers);
+	    if ((!Containers.contains(PlayerName.toLowerCase())) & (!Managers.contains(PlayerName.toLowerCase())) & (!Builders.contains(PlayerName.toLowerCase())) & (!Owner.equals(PlayerName))){
+	    	return false;
+	    }
+	    return true;
+	  }
+	  
+	  public boolean HasAccessorPermission(Claim C, String PlayerName)
+	  {
+	    String Owner = C.getOwnerName();
+	    List<String> Managers = new ArrayList<String>();
+	    List<String> Builders = new ArrayList<String>();
+	    List<String> Containers =new ArrayList<String>();
+	    List<String> Accessors = new ArrayList<String>();
+	    C.getPermissions(Builders, Containers, Accessors, Managers);
+	    if ((!Containers.contains(PlayerName.toLowerCase())) & (!Managers.contains(PlayerName.toLowerCase())) & (!Builders.contains(PlayerName.toLowerCase())) & (!Accessors.contains(PlayerName.toLowerCase())) & (!Owner.equals(PlayerName))){
+	    	return false;
+	    }
+	    return true;
+	  }
+	}
