@@ -1,0 +1,19 @@
+
+ManagerAndBuilderList:
+  ItemList:
+  RightClick:
+  ShiftRightClick:
+  LeftClick:
+  ShiftLeftClick:
+  
+ContainerList:
+  RightClick:
+  ShiftRightClick:
+  LeftClick:
+  ShiftLeftClick:
+  
+AccessorList:
+  RightClick:
+  ShiftRightClick:
+  LeftClick:
+  ShiftLeftClick:
