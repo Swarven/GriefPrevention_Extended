@@ -1,0 +1,241 @@
+package XDemonic.GriefPrevention_Extended;
+
+import java.util.List;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class Commands implements CommandExecutor
+{
+	  private final Main plugin;
+	  
+	  public Commands(Main plugin)
+	  {
+	    this.plugin = plugin;
+	  }
+	  
+	  public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
+	  {
+	    try
+	    {
+	      if (cmd.getName().equalsIgnoreCase("gpereload"))
+	      {
+	        this.plugin.reloadConfig();
+	        sender.sendMessage(ChatColor.GREEN + "[GriefPrevention_Ext] Config File Reloaded!");
+	        if ((sender instanceof Player))
+	        {
+	          Player player = (Player)sender;
+	          BroadCastToAdmins(player.getName(), "Has Reloaded The Config For GriefPrevention_Extended!");
+	        }
+	        else
+	        {
+	          BroadCastToAdmins("Console", "Has Reloaded The Config For GriefPrevention_Extended!");
+	        }
+	        return true;
+	      }
+	      if (cmd.getName().equalsIgnoreCase("gpeadd"))
+	      {
+	        if (args.length != 3)
+	        {
+	          sender.sendMessage(ChatColor.RED + "Incorrect Argument Count!");return false;
+	        }
+	        String Arg1 = GetClaimTier(args[0].toLowerCase());
+	        String Arg2 = GetInteractType(args[1].toLowerCase());
+	        String Arg3 = args[2].toLowerCase();
+	        if ((Arg1.equalsIgnoreCase("null")) || (Arg2.equalsIgnoreCase("null"))) {
+	          return false;
+	        }
+	        if ((!Arg1.equalsIgnoreCase("ManagerAndBuilderList")) && (Arg2.equalsIgnoreCase("ItemList")))
+	        {
+	          sender.sendMessage(ChatColor.RED + "Only <Builder> Can Have The <I> Argument!");return false;
+	        }
+	        List<String> configList = this.plugin.getConfig().getStringList(Arg1 + "." + Arg2);
+	        configList.add(Arg3);
+	        this.plugin.getConfig().set(Arg1 + "." + Arg2, configList);
+	        CleanUp(Arg3, Arg1, Arg2);
+	        sender.sendMessage(ChatColor.GREEN + "[GriefPrevention_Ext] Added '" + Arg3 + "' To [" + Arg1 + "." + Arg2 + "]");
+	        if ((sender instanceof Player))
+	        {
+	          Player player = (Player)sender;
+	          BroadCastToAdmins(player.getName(), "Has Added The Item '" + Arg3 + "' To [" + Arg1 + "." + Arg2 + "]");
+	        }
+	        else
+	        {
+	          BroadCastToAdmins("Console", "Has Added The Item '" + Arg3 + "' To [" + Arg1 + "." + Arg2 + "]");
+	        }
+	        return true;
+	      }
+	      if (cmd.getName().equalsIgnoreCase("gpedel"))
+	      {
+	        if (args.length != 3)
+	        {
+	          sender.sendMessage(ChatColor.RED + "Incorrect Argument Count!");return false;
+	        }
+	        String Arg1 = GetClaimTier(args[0].toLowerCase());
+	        String Arg2 = GetInteractType(args[1].toLowerCase());
+	        String Arg3 = args[2].toLowerCase();
+	        if ((Arg1.equalsIgnoreCase("null")) || (Arg2.equalsIgnoreCase("null"))) {
+	          return false;
+	        }
+	        if ((!Arg1.equalsIgnoreCase("ManagerAndBuilderList")) && (Arg2.equalsIgnoreCase("ItemList")))
+	        {
+	          sender.sendMessage(ChatColor.RED + "Only <Builder> Can Have The <I> Argument!");return false;
+	        }
+	        List<String> configList = this.plugin.getConfig().getStringList(Arg1 + "." + Arg2);
+	        if (configList.contains(Arg3))
+	        {
+	          configList.remove(Arg3);
+	          this.plugin.getConfig().set(Arg1 + "." + Arg2, configList);
+	          this.plugin.saveConfig();
+	          sender.sendMessage(ChatColor.GREEN + "[GriefPrevention_Ext] Removed '" + Arg3 + "' From [" + Arg1 + "." + Arg2 + "]");
+	          if ((sender instanceof Player))
+	          {
+	            Player player = (Player)sender;
+	            BroadCastToAdmins(player.getName(), "Has Removed The Item '" + Arg3 + "' From [" + Arg1 + "." + Arg2 + "]");
+	          }
+	          else
+	          {
+	            BroadCastToAdmins("Console", "Has Removed The Item '" + Arg3 + "' From [" + Arg1 + "." + Arg2 + "]");
+	          }
+	          return true;
+	        }
+	        sender.sendMessage(ChatColor.RED + "ID Does Not Exist In: " + Arg1 + "." + Arg2);
+	        return false;
+	      }
+	      if (cmd.getName().equalsIgnoreCase("gpelist"))
+	      {
+	        if (args.length != 2)
+	        {
+	          sender.sendMessage(ChatColor.RED + "Incorrect Argument Count!");return false;
+	        }
+	        String Arg1 = GetClaimTier(args[0].toLowerCase());
+	        String Arg2 = GetInteractType(args[1].toLowerCase());
+	        if ((Arg1.equalsIgnoreCase("null")) || (Arg2.equalsIgnoreCase("null"))) {
+	          return false;
+	        }
+	        if ((!Arg1.equalsIgnoreCase("ManagerAndBuilderList")) && (Arg2.equalsIgnoreCase("ItemList")))
+	        {
+	          sender.sendMessage(ChatColor.RED + "Only <Builder> Can Have The <I> Argument!");return false;
+	        }
+	        List<String> configList = this.plugin.getConfig().getStringList(Arg1 + "." + Arg2);
+	        sender.sendMessage(ChatColor.YELLOW + "List For: " + Arg1 + "." + Arg2);
+	        for (String Item : configList) {
+	          sender.sendMessage(ChatColor.GREEN + "- " + Item);
+	        }
+	        return true;
+	      }
+	      if (cmd.getName().equalsIgnoreCase("gpedebug"))
+	      {
+	        if (!(sender instanceof Player))
+	        {
+	          sender.sendMessage(ChatColor.RED + "Command Can Only Be Used By Players!");return false;
+	        }
+	        Player player = (Player)sender;
+	        if (Main.DebugPlayers.contains(player.getName()))
+	        {
+	          Main.DebugPlayers.remove(player.getName());
+	          player.sendMessage(ChatColor.RED + "[GPE Debug Mode Deactivated]");
+	        }
+	        else
+	        {
+	          Main.DebugPlayers.add(player.getName());
+	          player.sendMessage(ChatColor.GREEN + "[GPE Debug Mode Activated]");
+	        }
+	        return true;
+	      }
+	      return false;
+	    }
+	    catch (Exception EX)
+	    {
+	      Main.ERROR(EX.getMessage());
+	    }
+	    return false;
+	  }
+	  
+	  public void BroadCastToAdmins(String PlayerName, String Message)
+	  {
+	    for (Player p : this.plugin.getServer().getOnlinePlayers()) {
+	      if ((p.hasPermission("GriefPrevention_Extended.Message")) && (!p.getName().equalsIgnoreCase(PlayerName))) {
+	        p.sendMessage(ChatColor.GREEN + "[" + PlayerName + "] " + ChatColor.YELLOW + Message);
+	      }
+	    }
+	  }
+	  
+	  public void CleanUp(String ID, String Tier, String Event)
+	  {
+	    if (Tier.equals("ManagerAndBuilderList"))
+	    {
+	      List<String> CheckContainer = this.plugin.getConfig().getStringList("ContainerList." + Event);
+	      List<String> CheckAccessor = this.plugin.getConfig().getStringList("AccessorList." + Event);
+	      if (CheckContainer.contains(ID))
+	      {
+	        CheckContainer.remove(ID);this.plugin.getConfig().set("ContainerList." + Event, CheckContainer);
+	      }
+	      if (CheckAccessor.contains(ID))
+	      {
+	        CheckAccessor.remove(ID);this.plugin.getConfig().set("AccessorList." + Event, CheckAccessor);
+	      }
+	    }
+	    if (Tier.equals("ContainerList"))
+	    {
+	      List<String> CheckBuilder = this.plugin.getConfig().getStringList("ManagerAndBuilderList." + Event);
+	      List<String> CheckAccessor = this.plugin.getConfig().getStringList("AccessorList." + Event);
+	      if (CheckBuilder.contains(ID))
+	      {
+	        CheckBuilder.remove(ID);this.plugin.getConfig().set("ManagerAndBuilderList." + Event, CheckBuilder);
+	      }
+	      if (CheckAccessor.contains(ID))
+	      {
+	        CheckAccessor.remove(ID);this.plugin.getConfig().set("AccessorList." + Event, CheckAccessor);
+	      }
+	    }
+	    if (Tier.equals("AccessorList"))
+	    {
+	      List<String> CheckBuilder = this.plugin.getConfig().getStringList("ManagerAndBuilderList." + Event);
+	      List<String> CheckContainer = this.plugin.getConfig().getStringList("ContainerList." + Event);
+	      if (CheckBuilder.contains(ID))
+	      {
+	        CheckBuilder.remove(ID);this.plugin.getConfig().set("ManagerAndBuilderList." + Event, CheckBuilder);
+	      }
+	      if (CheckContainer.contains(ID))
+	      {
+	        CheckContainer.remove(ID);this.plugin.getConfig().set("ContainerList." + Event, CheckContainer);
+	      }
+	    }
+	    this.plugin.saveConfig();
+	  }
+	  
+	  public String GetClaimTier(String Argument)
+	  {
+	    switch (Argument)
+	    {
+	    case "access":
+	    	return "AccessorList";
+	    case "container":
+	    	return "ContainerList";
+	    case "builder":
+	    	return "ManagerAndBuilderList";
+	    }
+	    return "null";
+	  }
+	  
+	  public String GetInteractType(String Argument)
+	  {
+	    switch (Argument)
+	    {
+	    case "i":
+	    	return "ItemList";
+	    case "l":
+	    	return "LeftClick";
+	    case "r":
+	    	return "RightClick";
+	    case "sl":
+	    	return "ShiftLeftClick";
+	    case "sr":
+	    	return "ShiftRightClick";
+	    }
+	    return "null";
+	  }
+	}
