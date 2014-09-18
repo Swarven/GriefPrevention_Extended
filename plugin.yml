@@ -1,0 +1,64 @@
+main: XDemonic.GriefPrevention_Extended.Main
+name: GriefPrevention_Extended
+version: 1.0
+author: XDemonic
+depend: [GriefPrevention]
+description:    >
+              GriefPrevention_Extended by XDemonic
+
+commands:
+    gpereload:
+        description: Reloads Config File For GriefPrevention_Extended.
+        permission: GriefPrevention_Extended.Reload
+        usage: Simply Type /gpereload To Reload GriefPrevention_Extended
+    gpeadd:
+        description: Adds A Item Or Block To The Config Black List
+        permission: GriefPrevention_Extended.Add
+        usage: /gpeadd <Builder, Container, Access> <I,R,L,SR,SL> <Item/BlockID>
+    gpedel:
+        description: Removes A Item Or Block From The Config Black List
+        permission: GriefPrevention_Extended.Del
+        usage: /gpedel <Builder, Container, Access> <I,R,L,SR,SL> <Item/BlockID>
+    gpelist:
+        description: Displays A List Of Items Or Blocks From The Config Black List
+        permission: GriefPrevention_Extended.List
+        usage: /gpelist <Builder, Container, Access> <I,R,L,SR,SL>
+    gpedebug:
+        description: Activates Debug Mode
+        permission: GriefPrevention_Extended.Debug
+        usage: Simply Type /gpedebug To Toggle Debug Mode
+
+permissions:
+    GriefPrevention_Extended.*:
+        description: Gives All Access To All Commands
+        children:
+            GriefPrevention_Extended.Reload: true
+            GriefPrevention_Extended.Add: true
+            GriefPrevention_Extended.Del: true
+            GriefPrevention_Extended.List: true
+            GriefPrevention_Extended.Message: true
+            GriefPrevention_Extended.Debug: true
+
+    GriefPrevention_Extended.Reload:
+        description: Allows You To Use The Command To Reload Config File For GriefPrevention_Extended.
+        default: false
+
+    GriefPrevention_Extended.Add:
+        description: Allows You To Use The Command To Add Items/Blocks To The Config File.
+        default: false
+
+    GriefPrevention_Extended.Del:
+        description: Allows You To Use The Command To Remove Items/Blocks From The Config File.
+        default: false
+
+    GriefPrevention_Extended.List:
+        description: Allows You To Use The Command To View The Items/Blocks From The Config File.
+        default: false
+
+    GriefPrevention_Extended.Message:
+        description: Allows You To See The Message When One Of These Commands Is Used By A User.
+        default: false
+
+    GriefPrevention_Extended.Debug:
+        description: Allows You To Use The Command To Toggle Debug Mode.
+        default: false
